@@ -7,16 +7,16 @@ Maybe someone can make something nice of it, since i have no time to maintenance
 I know, there are Bugs, no Localisation and stuff like this, but it works.
 
 Use:
-- stert server.js (install modules first)
+- start server.js (install modules first)
 - close terminal > edit config file > insert npsso token & psnid > save
 - start again
-- load http://localhost/psn
 
 Frontend
+
 http://localhost/psn
 - Trophy Tracker designed to fit in an OBS Dock
+- automaticly start tracking, when a ps4, or ps5 game is launched
 ![image](https://github.com/user-attachments/assets/1d28df09-5a1b-4cfb-901b-feb5d997f68e)
-
 
 http://localhost/missing
 - List of missing Trophies. Is updated when a Trophy is earned
