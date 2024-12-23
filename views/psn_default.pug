@@ -1,0 +1,20 @@
+doctype html
+html(data-theme="dark")
+  head
+    title #{title}
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css')
+    link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css')
+    link(rel='stylesheet', href='css/jsuites.css')
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css') 
+    link(rel='stylesheet', href='css/psn.css')
+    script(src='/js/socket.io.js')
+    script(src='/js/jquery.min.js')  
+    script(src='/js/psn.js')
+    script(src='js/_jsuites.js')    
+  body
+    main
+      block header
+        header.header
+      block content
+

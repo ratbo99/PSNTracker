@@ -1,0 +1,21 @@
+block content
+                span 
+                    div.head
+                        div.Title(style="width:100%;") Fehlende Trophies:
+                        div.Title #{count}
+                - var c = count        
+                        if c > 0
+                            each result in results
+                                - var id = result[0]
+                                - var img = result[4]
+                                span(id=id)
+                                    div.Trophy(style="background-image: url('http://localhost/img/missing/"+result[3]+".png');")
+                                        img(src=img class="trophyimg")
+                                        div.Title #{result[1]}
+                                        div.Text #{result[2]}
+                        else 
+                             span(id=id)
+                                    div.Trophy
+                                        img(src=img class="trophyimg")
+                                        div.Title Alle Trophäen erspielt.
+                                        div.Text anderes Spiel wählen. 

@@ -1,0 +1,419 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+body {
+	display: flex;
+	/*text-align: center;*/
+	min-height: 100vh;
+	margin: 0px;
+	overflow: hidden;
+  /*font-family: Verdana, Arial, Helvetica, sans-serif;*/
+  /*font-family:  "Press Start 2P";*/	
+  font-family:  "Open Sans";
+	
+ }	
+  .container {			
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);	
+      /*opacity: 0;*/	
+      width: 425px;
+      border: 2px solid white;
+      border-radius: 10px;
+      padding-left: 30px;
+      padding-top: 30px;
+      padding-bottom: 30px;
+      background: linear-gradient(-45deg, RGBA(238,119,82,0.2), RGBA(231,60,126,0.2), RGBA(35,166,213,0.2), RGBA(35,213,171,0.2));
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      box-shadow: rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;
+	}
+  #dialog-trigger {
+    background-image: url('http://localhost/img/arrow-clockwise.png');
+    background-size: 25px 25px;
+    background-repeat: no-repeat;
+    background-position: auto;
+    background-position: 50% 50%; 
+    height: 40px;
+    margin-left: 5px;
+  }
+  .gamefield {
+    border: 2px red solid;
+    width: 375px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  .loaded{
+    border: 2px green solid;
+    width: 375px;
+  }
+ legend {
+  text-overflow: ellipsis; 
+  display: block; 
+  overflow: hidden; 
+  white-space: nowrap;
+   font-weight: bold;
+   font-size: 15px;
+   max-width: 375px;
+   padding-left: 10px;
+   padding-right: 10px;
+ }
+#games {
+  width: 335px;
+  height: 50px;
+  float: left;
+  display: none;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+
+input {
+  height: 40px;
+}
+
+.jdropdown-default {
+  height: 0px;
+}
+.jdropdown-header {
+  height: 40px;  
+}
+  
+
+.stop {
+  margin-left: 5px;
+}
+
+
+
+[type="checkbox"] {
+  z-index: 0;
+  margin-right: 10px;
+  margin-top: 6px;
+  margin-left: 5px;
+}
+[type="checkbox"] + label {
+  z-index: 0;
+  margin-top: 3px;
+}
+
+@keyframes run {
+  0% { border: 2px green solid; }
+  50%  { border: 2px black solid; } 
+  100% { border: 2px green solid; }  
+}
+ 
+  .trophies {
+    display: flex;
+  }
+  .options {
+    text-align: left;
+    transform: scale(.9);
+    margin-left: -10px;
+  }
+  .npCommunicationId,.npServiceName {
+    display: none;
+  }
+  div.platin, div.gold, div.silber, div.bronze {
+    width: 25%;
+    font-weight: bold;
+    padding:10px;
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-position: 50% 10px;
+    padding-top: 45px;
+    text-align: center;
+  }
+  .trophy {
+    background-image: url('http://localhost/img/platinum.png');
+  }
+  div.gold {
+    background-image: url('http://localhost/img/gold.png');
+  }
+  div.silber {
+    background-image: url('http://localhost/img/silver.png');
+  }
+  div.bronze {
+    background-image: url('http://localhost/img/bronze.png');
+  }    
+
+  .trophy2 {
+    background-image: url('http://localhost/img/platinum_ps5.png');
+  }
+  
+
+
+  h2 {
+    margin: 0;
+    margin-bottom: 20px;
+  }
+  .button {
+    position: relative;
+  }
+
+  .button__text {
+    transition: all 0.2s;
+  }
+  
+  .button--loading .button__text {
+    visibility: hidden;
+    opacity: 0;
+  }
+  
+  .button--loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    border: 4px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: button-loading-spinner 1s ease infinite;
+  }
+  
+  @keyframes button-loading-spinner {
+    from {
+      transform: rotate(0turn);
+    }
+  
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+
+  .notes-toggle {
+    /* background: #95A5A6; */
+    display: inline-block;
+    padding: 0px 5px 0px 5px;
+    border-radius: 20px;
+    position:relative;
+    /*border: 1px solid white;*/
+    left:2px;
+    color:#fff;
+    border-radius: 5px;
+    /*border: 2px solid #95A5A6;*/
+    margin-left: 20px;
+  }
+  .notes-toggle input {
+    /* display: none; */
+    position: absolute;
+    z-index: 3;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .timer-toggle {
+    /* background: #95A5A6; */
+    display: inline-block;
+    padding: 0px 5px 0px 5px;
+    border-radius: 20px;
+    position:relative;
+    /*border: 1px solid white;*/
+    left:2px;
+    color:#fff;
+    border-radius: 5px;
+    /*border: 2px solid #95A5A6;*/
+
+  }
+  .timer-toggle input {
+    /* display: none; */
+    position: absolute;
+    z-index: 3;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .tw-toggle {
+    /* background: #95A5A6; */
+    display: inline-block;
+    padding: 2px 3px;
+    border-radius: 20px;
+    position:relative;
+
+    /*border: 2px solid #95A5A6;*/
+  }
+
+  
+  .tw-toggle label {
+    text-align: center;
+    font-family: sans-serif;
+    display: inline-block;
+    color: #95A5A6;
+    position:relative;
+    z-index:2;
+    margin: 0;
+    text-align: center;
+    padding: 2px 3px;
+    font-size: 15px;
+    margin-left: 5px;
+    /* cursor: pointer; */
+  }
+  
+  .tw-toggle input {
+    /* display: none; */
+    position: absolute;
+    z-index: 3;
+    opacity: 0;
+    cursor: pointer;
+
+  }
+  
+  .tw-toggle span {
+    height: 21px;
+    width: 21px;
+    line-height: 21px;
+    border-radius: 50%;
+    background:#fff;
+    display:block;
+    position:absolute;
+    left: 22px;
+    top: 2px;
+    transition:all 0.3s ease-in-out;
+
+  }
+  
+  .tw-toggle input[value="false"]:checked ~ span{
+    background:#e74c3c;
+    left:2px;
+    color:#fff;
+  }
+  
+  .tw-toggle input[value="true"]:checked ~ span{
+    background:#27ae60;
+    left: 46px;
+  }
+  .tw-toggle input[value="-1"]:checked ~ span{
+    background:#95A5A6;
+    left: 23px;
+  }
+  
+  .tw-toggle input[value="false"]:checked + label,.tw-toggle input[value="true"]:checked + label{
+    border: 1px solid white;
+    left:2px;
+    color:#fff;
+    border-radius: 5px;
+  }
+  .tw-toggle input[value="-1"]:checked + label{
+    border: 1px solid white;
+    left:2px;
+    color:#fff;
+    border-radius: 5px;
+  }
+
+  
+  .region-toggle {
+    /* background: #95A5A6; */
+    display: inline-block;
+    padding: 2px 3px;
+    border-radius: 20px;
+    position:relative;
+
+    /*border: 2px solid #95A5A6;*/
+  }
+
+  .region-toggle label {
+    text-align: center;
+    font-family: sans-serif;
+    display: inline-block;
+    color: #95A5A6;
+    position:relative;
+    z-index:2;
+    margin: 0;
+    text-align: center;
+    padding: 2px 3px;
+    font-size: 15px;
+    margin-left: 5px;
+    /* cursor: pointer; */
+  }
+
+  
+  .region-toggle input {
+    /* display: none; */
+    position: absolute;
+    z-index: 3;
+    opacity: 0;
+    cursor: pointer;
+
+  }
+  
+  .region-toggle span {
+    height: 21px;
+    width: 21px;
+    line-height: 21px;
+    border-radius: 50%;
+    background:#fff;
+    display:block;
+    position:absolute;
+    left: 22px;
+    top: 2px;
+    transition:all 0.3s ease-in-out;
+
+  }
+  
+  .region-toggle input[value="eu"]:checked ~ span{
+    background:#e74c3c;
+    left:2px;
+    color:#fff;
+  }
+  
+  .region-toggle input[value="na"]:checked ~ span{
+    background:#27ae60;
+    left: 46px;
+  }
+  .region-toggle input[value="as"]:checked ~ span{
+    background:#95A5A6;
+    left: 23px;
+  }
+  
+  .region-toggle input[value="eu"]:checked + label,.region-toggle input[value="as"]:checked + label{
+    border: 1px solid white;
+    left:2px;
+    color:#fff;
+    border-radius: 5px;
+  }
+  .region-toggle input[value="na"]:checked + label{
+    border: 1px solid white;
+    left:2px;
+    color:#fff;
+    border-radius: 5px;
+  }
+
+  .labelNotes{
+    padding-left: 3px;    
+  }
+  .regions{
+    font-weight: bold;
+    width: 40%;
+    text-align:right;
+    margin-right: 5px;
+  }
+  .playTime, .playTimeLabel{
+    margin-top: 3px;
+    font-weight: bold;
+  }
+  .playTime {
+    margin-left: 5px;
+  }
+  .comment{
+    margin-left: -10px;
+
+  }
+  .gameInfos{display:none;}
+  .addTimer{ text-align: center;}
+  .hours, .minutes, .seconds{ width: 50px; display: inline-block; }

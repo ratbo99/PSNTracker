@@ -1,0 +1,127 @@
+extends psn_default
+block content
+        div.container
+            div.npCommunicationId
+            div.npServiceName
+            div.trophies                     
+                    div(style="width: 325px;")
+                        h2 PSN Trophy Tracker
+                    div 
+                        div.tw-toggle
+                            input(type="radio" name="toggle" value="false" id="asc" data="?sort=asc" title="aufsteigend sortieren")
+                            label.toggle.toggle-yes
+                                i.fa.fa-sort-amount-asc
+                            input(type="radio" name="toggle" value="-1" id="last" data="" title="zuletzt gespielt")
+                            label.toggle.toggle-yes
+                                i.fa.fa-minus
+                            input(type="radio" name="toggle" value="true" id="desc" data="?sort=desc" title="absteigend sortieren")
+                            label.toggle.toggle-yes
+                                i.fa.fa-sort-amount-desc
+
+            div.content
+                div.trophies
+                    div(style="float: left;")
+                        select#games
+                            option() Bitte Spiel wählen...
+                            each result in results 
+                                option(value=result[1] data-timestamp=result[2]) #{result[0]}
+                    div
+                        button.load(type="button" id="dialog-trigger" title="alle Spiele laden?")
+                    span#dialog-result
+                    dialog#dialog
+                        header Games neu laden?
+                        form(method="dialog")
+                            menu 
+                                button(value="100") 1. lade alle Spiele
+                                button(value="all" data-count=count class="allGames") 2. lade Spielzeiten (PS4, PS5)
+                                button(value="no") Abbrechen 
+
+                    span#dialog-notes
+                    dialog#notes
+                        header Kommentar hinzufügen?
+                        form(method="dialog")
+                            div.addNotes Bitte Spiel laden.
+                            menu 
+                                button(value="save") Speichern
+                                button(value="no") Abbrechen
+
+                    span#dialog-timer
+                    dialog#timer
+                        header Timer ändern.
+                        form(method="dialog")
+                            div.addTimer
+                                table(style="width: 325px;")
+                                    tr 
+                                       td(width=110 style="text-align:right;") Stunden 
+                                       td(width=70 style="text-align:center;") Minuten 
+                                       td(width=100 style="text-align:cleft;") Sekunden
+                                       td
+
+                                table(style="width: 325px;")
+                                    tr 
+                                        td 
+                                        td 
+                                            input.hours(type="number" inputmode="numeric" pattern="[-+]?[0-9]*[.,]?[0-9]+")
+                                        td 
+                                        td 
+                                            input.minutes(type="number" inputmode="numeric" pattern="[-+]?[0-9]*[.,]?[0-9]+" min="0" max="60") 
+                                        td 
+                                        td 
+                                            input.seconds(type="number" inputmode="numeric" pattern="[-+]?[0-9]*[.,]?[0-9]+" min="0" max="60") 
+                                        td
+                                        td  
+                            div.searchResults
+                            menu 
+                                button(value="save") Speichern
+                                button(value="search")
+                                    i.fa.fa-search
+                                button(value="no") Abbrechen               
+
+                fieldset.gamefield
+                    legend.gameTitle bitte Spiel wählen!
+                    
+
+                    div.trophies
+                        div.platin 0 / 0 <br />(0)
+                        div.gold 0 / 0 <br />(0)
+                        div.silber 0 / 0 <br />(0)
+                        div.bronze 0 / 0 <br />(0)
+
+                    
+                    div.gameInfos
+                        div.trophies(style="border-top: 1px solid rgba(0, 0, 0, 0.4);padding-top: 10px;")
+                            div.playTimeLabel Spielzeit:
+                            div.playTime 00:00:00
+                            div.changeTimer
+                                div.timer-toggle                           
+                                    input(type="checkbox" name="changeTimer" value="change" id="changeTimer" title="Timer ändern")
+                                    label.toggle
+                                        i.fa.fa-pencil
+                            div.regions Region:
+                                div.region-toggle
+                                        input(type="radio" name="region" value="eu" id="eu" title="EU")
+                                        label.toggle.toggle-yes
+                                            i.fa.fa-eur
+                                        input(type="radio" name="region" value="na" id="na" title="NA")
+                                        label.toggle.toggle-yes
+                                            i.fa.fa-usd
+                                        input(type="radio" name="region" value="as" id="as"  title="AS")
+                                        label.toggle.toggle-yes
+                                            i.fa.fa-jpy                  
+
+                            div.comment
+                                div.notes-toggle                           
+                                    input(type="checkbox" name="toggle2" value="add" id="addnotes" title="Kommentar zu Spiel hinzufügen")
+                                    label.toggle
+                                        i.fa.fa-commenting-o
+                div.trophies
+                    button.start.button(type="button" disabled) 
+                        span.button__text Start
+                    button.stop(type="button" disabled) Stop
+                    div.options
+                        input(type="checkbox" name="titleInTxt" class="titleInTxt")
+                        label(for="titleInTxt") Titel in gesamt.txt?
+                        hr(style="opacity: 0; margin: 0;")
+                        input(type="checkbox" name="missingTrophies" class="missingTrophies")
+                        label(for="missingTrophies") lade fehlende Trophies?
+                
