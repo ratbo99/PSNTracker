@@ -7,7 +7,7 @@ Maybe someone can make something nice of it, since i have no time to maintenance
 I know, there are Bugs, no Localisation and stuff like this, but it works.
 
 Use:
-- start server.js (install modules first)
+- start server.js (or PSNTacker.exe)
 - close terminal > edit config file > insert npsso token & psnid > save
 - start again
 
@@ -31,6 +31,12 @@ http://localhost/overlay
 - overlay for earned trophies. shows different platinum picture for ps4, ps5.
 ![image](https://github.com/user-attachments/assets/79d7f735-c012-4bf7-8ba3-47797a9be816)
 ![image](https://github.com/user-attachments/assets/e26de516-cf34-442e-a3d7-be0dd977e9dc)
+
+
+NOTE: Back in the days OBS wasn't capable of working with datalist html tag. I think now adays its posible to change it to datalist.
+
+TODO: igdb implemantation & managing backlog.
+
 
 
 
