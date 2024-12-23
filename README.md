@@ -1,7 +1,7 @@
 # PSNTracker
 a Tool to show Live Overlays for Tropyhunters
 
-This is Playstation Trophytracker to show live overlays in OBS. I started coding it in 2021, fixes some Api related stuff and this is my messy Codebase. Maybe someone can make somthing nice of it.
+This is Playstation Trophytracker - a Tool to show live overlays in OBS. I started coding it in 2021, fixes some Api related stuff and this is my messy Codebase. Maybe someone can make somthing nice of it.
 
 I know, there are Bugs, no Localisation and stuff like this, but it works.
 
