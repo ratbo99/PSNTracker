@@ -1,5 +1,5 @@
 # PSNTracker
-this is a small Node Tool to provide a Textfiles and an Overlay for earned Playstation Trophies by cheking the Plastation Network API.
+this is a small Node Tool to provide Textfiles and an Overlay for earned Playstation Trophies by cheking the Plastation Network API.
 
 What you need:
 - your Playstation PSN Name
