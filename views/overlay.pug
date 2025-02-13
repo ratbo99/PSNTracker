@@ -1,0 +1,14 @@
+extends _default
+block content
+        div.container
+                div.overlay
+                        if count > 0
+                                div(style="background-image: url('./img/platinum_"+game.npServiceName+".png');") #{game.earnedTrophies.platinum} / #{game.definedTrophies.platinum} <br />
+                                div(style="background-image: url('./img/gold_"+game.npServiceName+".png');") #{game.earnedTrophies.gold} / #{game.definedTrophies.gold} <br />
+                                div(style="background-image: url('./img/silver_"+game.npServiceName+".png');") #{game.earnedTrophies.silver} / #{game.definedTrophies.silver} <br />
+                                div(style="background-image: url('./img/bronze_"+game.npServiceName+".png');") #{game.earnedTrophies.bronze} / #{game.definedTrophies.bronze} <br />
+                        else 
+                                div(style="background-image: url('./img/platinum_trophy2.png');") 0 / 0 <br />
+                                div(style="background-image: url('./img/gold_trophy2.png');") 0 / 0 <br />
+                                div(style="background-image: url('./img/silver_trophy2.png');") 0 / 0 <br />
+                                div(style="background-image: url('./img/bronze_trophy2.png');") 0 / 0 <br />

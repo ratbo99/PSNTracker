@@ -1,0 +1,42 @@
+extends _default
+block content
+        - var dlc =  "default"
+        div.container
+                    div.head
+                        if game.titleName
+                            div.Title.grow #{game.titleName}
+                        else 
+                            div.Title.grow kein Spiel gestartet
+                        div
+                            div.switch 
+                                if showTrophies
+                                    input.look(id="checkbox1" type="checkbox" checked onclick="showTrophies()")
+                                else 
+                                    input.look(id="checkbox1" type="checkbox" onclick="showTrophies()")
+                                label(for="checkbox1" id="label")
+                        div.Title #{count-unearnedCount} / #{count}
+          
+                    if count > 0
+                        each trophy in trophies
+                            span(id=trophy.trophyId)
+                                    if trophy.earned 
+                                        - var settings = "background-color: #b8fcc3;"
+                                        if !showTrophies
+                                            - var settings = "display: none;"
+                                    else 
+                                        - var settings = "background-color: #fff;"
+
+                                    if dlc != trophy.trophyGroupId && trophy.trophyGroupId != "default"
+                                        div.head
+                                            div.Title.grow #{trophy.trophyGroupName}
+                                            - var dlc = trophy.trophyGroupId    
+                                    div.Trophy(style=""+settings+" background-image: url('./img/trophies/"+trophy.trophyType+"_"+game.npServiceName+".png');")
+                                        img(src=trophy.trophyIconUrl)
+                                        div.grow
+                                            div.Title #{trophy.trophyName}
+                                            div.Text #{trophy.trophyDetail}
+                                        if trophy.progressRate
+                                            div.progress(style="background: linear-gradient(to right, #4caf50 "+trophy.progressRate+"%, #eee "+trophy.progressRate+"%);") #{trophy.progress} /  #{trophy.trophyProgressTargetValue}
+                                        if trophy.earnedDateTime
+                                            div.earned 
+                                                != trophy.earnedDateTime.replace(' ', ' | ')
