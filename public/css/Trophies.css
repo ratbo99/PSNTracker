@@ -71,7 +71,6 @@ body {
   height:30px;
   margin-top:-12px;
   position: relative;
-  position: relative;
   }
   
   div.earned {
@@ -134,15 +133,3 @@ body {
   .switch .look:checked + label {
   background-color:#b0c4de
   }
-
-  .progress2 {
-    width: 150px;
-    text-align: center;
-    line-height: 20px;
-    font-weight: bold;
-    color: #000;
-    border-radius: 15px;
-    height:fit-content;
-    position:relative;
-    top:65px
-}
