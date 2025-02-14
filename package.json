@@ -1,6 +1,6 @@
 {
   "name": "psn-trophy-tracker",
-  "version": "0.6",
+  "version": "0.6.1",
   "description": "RatBo's - PSN Tracker",
   "main": "server.js",
   "scripts": {

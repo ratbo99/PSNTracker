@@ -175,82 +175,79 @@ const getAccountId = async (psnID) => {
 }
 
 const updateGame = async (game, changes) => { 
-    if(changes.length > 0 ) {
-        console.clear()
-        urls.push(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`)
-          fetchData(urls, (data, urls) => {
-            trophySummary = data[0];           
-            console.log(`🎉 Level: ${trophySummary.trophyLevel} (${trophySummary.progress}%) |`,"💎",trophySummary.earnedTrophies.platinum, "🥇", trophySummary.earnedTrophies.gold, "🥈", trophySummary.earnedTrophies.silver, "🥉", trophySummary.earnedTrophies.bronze);
-            console.log("\n")
-            console.log( "🏆",game.titleName, `(Fortschritt: ${game.progress}%, Spielzeit: ${game.playDuration}, Wie oft: ${game.playCount})`)
-            console.log(`💎 ${game.earnedTrophies.platinum}/${game.definedTrophies.platinum} 🥇 ${game.earnedTrophies.gold}/${game.definedTrophies.gold} 🥈 ${game.earnedTrophies.silver}/${game.definedTrophies.silver} 🥉 ${game.earnedTrophies.bronze}/${game.definedTrophies.bronze}`)
-            
-            if (changes.length >= 1 || changes.includes("titleID")) {
-              const totalEarnedTrophies = Object.values(game.earnedTrophies).reduce((sum, value) => sum + value, 0);
-              const totalDefinedTrophies = Object.values(game.definedTrophies).reduce((sum, value) => sum + value, 0);
-              writeData(`data/titel.txt`,`${game.titleName} ${config.seperator} ${totalEarnedTrophies} / ${totalDefinedTrophies} ${config.seperator} ${game.progress}%`);
-              changes.forEach(change => {
-                    // es kommt ein array an - ["earned.gold","earned.platinum"...]
-                    let parts = change.split(".")
-                    if(parts[0]==="earnedTrophies") {
-                      let str = `${game.earnedTrophies[parts[1]]}/${game.definedTrophies[parts[1]]}`                  
-                      writeData(`data/${parts[1]}.txt`,str);
-                      if(parts[1]==="platinum") writeData(`data/platingesamt.txt`,trophySummary.earnedTrophies.platinum);
-                    }
-              });
-            }
-            io.sockets.emit("updateOverlay",game);
-            getTrophies(playedGame);
+
+        if (changes.length >= 1 || changes.includes("titleID")) {
+          console.clear()
+          const totalEarnedTrophies = Object.values(game.earnedTrophies).reduce((sum, value) => sum + value, 0);
+          const totalDefinedTrophies = Object.values(game.definedTrophies).reduce((sum, value) => sum + value, 0);
+          writeData(`data/titel.txt`,`${game.titleName} ${config.seperator} ${totalEarnedTrophies} / ${totalDefinedTrophies} ${config.seperator} ${game.progress}%`);
+          changes.forEach(change => {
+                // es kommt ein array an - ["earned.gold","earned.platinum"...]
+                let parts = change.split(".")
+                if(parts[0]==="earnedTrophies") {
+                  let str = `${game.earnedTrophies[parts[1]]}/${game.definedTrophies[parts[1]]}`                  
+                  writeData(`data/${parts[1]}.txt`,str);
+                  if(parts[1]==="platinum") writeData(`data/platingesamt.txt`,trophySummary.earnedTrophies.platinum);
+                }
           });
-    }
+
+
+          trophySummary = await fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`);
+          console.log(`🎉 Level: ${trophySummary.trophyLevel} (${trophySummary.progress}%) |`,"💎",trophySummary.earnedTrophies.platinum, "🥇", trophySummary.earnedTrophies.gold, "🥈", trophySummary.earnedTrophies.silver, "🥉", trophySummary.earnedTrophies.bronze);
+          console.log("\n")
+          console.log( "🏆",game.titleName, `(Fortschritt: ${game.progress}%, Spielzeit: ${game.playDuration}, Wie oft: ${game.playCount})`)
+          console.log(`💎 ${game.earnedTrophies.platinum}/${game.definedTrophies.platinum} 🥇 ${game.earnedTrophies.gold}/${game.definedTrophies.gold} 🥈 ${game.earnedTrophies.silver}/${game.definedTrophies.silver} 🥉 ${game.earnedTrophies.bronze}/${game.definedTrophies.bronze}`)
+        
+          io.sockets.emit("updateOverlay",game);
+          getTrophies(playedGame);
+
+        }
 };
 
 async function checkForChanges() {
-  urls.push(`${BASEURL}/userProfile/v1/internal/users/${config.accountID}/basicPresences?type=primary`);
-  try {
-    fetchData(urls, (data) => {
-      try {        
-            if(data[0].basicPresence.gameTitleInfoList[0].npTitleId != lastPlayedGame.titleID) {
-              trophyList = {}
-              playedGame.titleID = data[0].basicPresence.gameTitleInfoList[0].npTitleId;
-              playedGame.titleName = data[0].basicPresence.gameTitleInfoList[0].titleName;
-            }
-  
-            urls.push(`${BASEURL}/trophy/v1/users/${config.accountID}/titles/trophyTitles?npTitleIds=${playedGame.titleID}`)
-            urls.push(`${BASEURL}/gamelist/v2/users/${config.accountID}/titles?categories=ps4_game,ps5_native_game&limit=1&offset=0`)
-  
-            fetchData(urls, (data) => {
-                //console.log(data[0].titles, data[1].titles[0].titleId)
-                playedGame.playDuration = getPlaytimeFormat(data[1].titles[0].playDuration)
-                playedGame.playCount = data[1].titles[0].playCount;
-                try {playedGame.progress = data[0].titles[0].trophyTitles[0].progress } catch { playedGame.progress = 0 }
-                try {playedGame.earnedTrophies = data[0].titles[0].trophyTitles[0].earnedTrophies} catch { playedGame.earnedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} }
-                try {playedGame.definedTrophies = data[0].titles[0].trophyTitles[0].definedTrophies } catch { playedGame.definedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} }
-                try {playedGame.npServiceName =  data[0].titles[0].trophyTitles[0].npServiceName } catch { playedGame.npServiceName="trophy2" }
-                try {playedGame.npCommunicationId =  data[0].titles[0].trophyTitles[0].npCommunicationId } catch {playedGame.npCommunicationId=lastPlayedGame.npCommunicationId }
-                updateGame(playedGame,getChangedKeys(lastPlayedGame,playedGame));
-                lastPlayedGame = structuredClone(playedGame) 
-            })
-          } catch {
-              console.clear();
-              console.log("kein Spiel gestartet");
-              playedGame.earnedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} 
-              playedGame.definedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0}
-              playedGame.npServiceName = "trophy2"
-              io.sockets.emit("updateOverlay",playedGame);
-              io.sockets.emit("updateTrophies",1);
-              writeData(`data/platinum.txt`,"0 / 0");
-              writeData(`data/gold.txt`,"0 / 0");
-              writeData(`data/bronze.txt`,"0 / 0");
-              writeData(`data/silver.txt`,"0 / 0");
-              writeData(`data/titel.txt`,"kein Spiel gestartet");
-              playedGame = {}
-              trophyList = {}          
-          }
-  })
-  } catch {
 
-  }
+    fetchPSNData(`${BASEURL}/userProfile/v1/internal/users/${config.accountID}/basicPresences?type=primary`).then((data) => {
+      //console.log(data)
+      try {
+        if(data.basicPresence.gameTitleInfoList[0].npTitleId && data.basicPresence.gameTitleInfoList[0].npTitleId != lastPlayedGame.titleID) {
+          trophyList = {}
+          playedGame.titleID = data.basicPresence.gameTitleInfoList[0].npTitleId;
+          playedGame.titleName = data.basicPresence.gameTitleInfoList[0].titleName;
+        }
+    
+        urls.push(`${BASEURL}/trophy/v1/users/${config.accountID}/titles/trophyTitles?npTitleIds=${playedGame.titleID}`)
+        urls.push(`${BASEURL}/gamelist/v2/users/${config.accountID}/titles?categories=ps4_game,ps5_native_game&limit=1&offset=0`)
+    
+        fetchData(urls, (data) => {
+            playedGame.playDuration = getPlaytimeFormat(data[1].titles[0].playDuration)
+            playedGame.playCount = data[1].titles[0].playCount;
+            try {playedGame.progress = data[0].titles[0].trophyTitles[0].progress } catch { playedGame.progress = 0 }
+            try {playedGame.earnedTrophies = data[0].titles[0].trophyTitles[0].earnedTrophies} catch { playedGame.earnedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} }
+            try {playedGame.definedTrophies = data[0].titles[0].trophyTitles[0].definedTrophies } catch { playedGame.definedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} }
+            try {playedGame.npServiceName =  data[0].titles[0].trophyTitles[0].npServiceName } catch { playedGame.npServiceName="trophy2" }
+            try {playedGame.npCommunicationId =  data[0].titles[0].trophyTitles[0].npCommunicationId } catch {playedGame.npCommunicationId=lastPlayedGame.npCommunicationId }
+            updateGame(playedGame,getChangedKeys(lastPlayedGame,playedGame));
+            lastPlayedGame = structuredClone(playedGame) 
+        })
+      } catch(err) {
+        console.log(playedGame,err)
+        console.clear();
+        console.log("kein Spiel gestartet");
+        playedGame.earnedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} 
+        playedGame.definedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0}
+        playedGame.npServiceName = "trophy2"
+        io.sockets.emit("updateOverlay",playedGame);
+        io.sockets.emit("updateTrophies",1);
+        writeData(`data/platinum.txt`,"0 / 0");
+        writeData(`data/gold.txt`,"0 / 0");
+        writeData(`data/bronze.txt`,"0 / 0");
+        writeData(`data/silver.txt`,"0 / 0");
+        writeData(`data/titel.txt`,"kein Spiel gestartet");
+        playedGame = {}
+        trophyList = {}  
+      }
+      
+    });
 }
 
 async function getTrophies(game) {
@@ -275,12 +272,9 @@ async function getTrophies(game) {
     })
   }
 
-  //https://m.np.playstation.com/api/trophy/v1/npCommunicationIds/{npCommunicationId}/trophyGroups
-  trophyUrls.push(`${BASEURL}/trophy/v1/users/${config.accountID}/npCommunicationIds/${game.npCommunicationId}/trophyGroups/all/trophies?npServiceName=${game.npServiceName}`);
-
-  fetchData(trophyUrls, (trophySet) => {
+  fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/npCommunicationIds/${game.npCommunicationId}/trophyGroups/all/trophies?npServiceName=${game.npServiceName}`).then((trophySet) => {
     const mergedTrophies = trophyList.map(definedTrophy => {
-      const earnedTrophy = trophySet[0].trophies.find(t => t.trophyId === definedTrophy.trophyId);      
+      const earnedTrophy = trophySet.trophies.find(t => t.trophyId === definedTrophy.trophyId);      
       return {
         ...definedTrophy,
         progress: earnedTrophy?.progress || false,
@@ -291,12 +285,30 @@ async function getTrophies(game) {
         trophyEarnedRate: earnedTrophy?.trophyEarnedRate || null
       };
     });
-
     trophies = structuredClone(mergedTrophies)
     io.sockets.emit("updateTrophies",1);
-    
-  })
+  });
 }
+
+const fetchPSNData = async (url) => {
+  const tokens = await getToken(); 
+  return fetch(url, {
+    method: "GET", // Specify request method
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${tokens.access_token}`,
+      "Accept-Language": "de-DE",
+    },
+    responseType: "json"
+  })
+    .then((res) => res.json() )
+    .then((data) => {
+      return data            
+    })
+    .catch((err) => {
+      console.log("Unable to fetch -", err);
+    })     
+};
 
 function getChangedKeys(obj1, obj2) {
   function flattenObject(obj, prefix = '') {
@@ -357,7 +369,7 @@ const init = async () => {
     config.psnNPSSO = psnNPSSO
     config.seperator = "*"
     config.showTrophies = true
-    config.port = 3000
+    config.port = port
 
     saveConfig(config);
 
@@ -378,11 +390,11 @@ function splashscreen() {
   console.groupEnd();
   console.info(`Server läuft auf Port: ${config.port} - ändern in config.json\n`);
 
-  urls.push(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`)
-  fetchData(urls, (data, urls) => {
-    trophySummary = data[0];
+  fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`).then((data) => {
+    trophySummary = data;
     writeData(`data/platingesamt.txt`,trophySummary.earnedTrophies.platinum);
   });
+
   // Starte Intervall
   setInterval(checkForChanges, "7000");
 }
@@ -418,10 +430,10 @@ function logErrorToFile(error) {
     fs.appendFileSync(logFile, errorMessage);
 }
 
-// Uncaught Exceptions abfangen - error Logging nach PSN Ausfall am 8.2.2ß25 hinzugefügt
+// Uncaught Exceptions abfangen - error Logging nach PSN Ausfall am 8.2.2025 hinzugefügt
 process.on('uncaughtException', (error) => {
     logErrorToFile(error);
-    console.error('Uncaught Exception! Siehe error.log - evtl. PSN, oder Internet down');
+    console.error('Uncaught Exception! Siehe error.log');
     setInterval(function(){}, 1000);
     //process.exit(1); // Beendet das Programm mit Fehlercode
 });

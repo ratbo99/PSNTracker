@@ -31,12 +31,13 @@ block content
                                             div.Title.grow #{trophy.trophyGroupName}
                                             - var dlc = trophy.trophyGroupId    
                                     div.Trophy(style=""+settings+" background-image: url('./img/trophies/"+trophy.trophyType+"_"+game.npServiceName+".png');")
+                                        div.progress(style="background: linear-gradient(to right, #b8fcc3 "+trophy.progressRate+"%, rgba(255, 255, 255, 0) "+trophy.progressRate+"%);") 
                                         img(src=trophy.trophyIconUrl)
                                         div.grow
                                             div.Title #{trophy.trophyName}
                                             div.Text #{trophy.trophyDetail}
                                         if trophy.progressRate
-                                            div.progress(style="background: linear-gradient(to right, #4caf50 "+trophy.progressRate+"%, #eee "+trophy.progressRate+"%);") #{trophy.progress} /  #{trophy.trophyProgressTargetValue}
+                                            div.earned(style="margin-right: 40px;") #{trophy.progress} | #{trophy.trophyProgressTargetValue}
                                         if trophy.earnedDateTime
                                             div.earned 
                                                 != trophy.earnedDateTime.replace(' ', ' | ')

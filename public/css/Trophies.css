@@ -24,15 +24,27 @@ body {
   }
   
   div.Trophy, div.head {
-  height:100%;
-  padding:22px;
-  padding-right:12px;
-  background-color:#fff;
-  margin:10px;
-  background-repeat:no-repeat;
-  background-position:right;
-  display:flex
+    height: 100%;
+    padding: 22px;
+    padding-right: 12px;
+    background-color: #fff;
+    margin: 10px;
+    background-repeat: no-repeat;
+    background-position: right;
+    display: flex;
+    position: relative;
   }
+  
+  div.Trophy .progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+    opacity: .9;
+    mix-blend-mode: multiply; 
+}
   
   div.head {
   padding:5px 22px 0 22px;
@@ -48,14 +60,18 @@ body {
   font-size:25px;
   font-weight:600;
   height:40px;
-  margin-top:6px
+  margin-top:6px;
+  z-index: 2;
+  position: relative;
   }
   
   div.Text {
   font-weight:600;
   padding-top:10px;
   height:30px;
-  margin-top:-12px
+  margin-top:-12px;
+  position: relative;
+  position: relative;
   }
   
   div.earned {
@@ -119,7 +135,7 @@ body {
   background-color:#b0c4de
   }
 
-  .progress {
+  .progress2 {
     width: 150px;
     text-align: center;
     line-height: 20px;
