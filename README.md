@@ -11,5 +11,4 @@ then goto https://ca.account.sony.com/api/v1/ssocookie and copy the NPSSO Key
 Start PSNTracker type in the PSNId you want to track and the copied NPSSO Key.
 
 Todo:
-- there are some games which give not the excpected results (ping redux for example). need more tests to see if there are some other niche games that give other unexpected results.
 - make the trophy list page a little bit nicer, clean up css.
