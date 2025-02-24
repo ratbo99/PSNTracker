@@ -281,7 +281,6 @@ async function getTrophies(game) {
 const fetchPSNData = async (url) => {
   const tokens = await getToken(); 
   try {
-    const tokens = await getToken();
     const response = await fetch(url, {
       method: "GET",
       headers: {
