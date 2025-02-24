@@ -55,46 +55,32 @@ function getDateFormat(dateString) {
    } catch {
 
    }
-   
-    /*try {
-      return new Intl.DateTimeFormat("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: "Europe/Berlin",
-      }).format(date).replace(",", "");
-    } catch(err) {
-      console.log(err)
-    }*/
+
 }
 
 const path = require('path');
 const fs = require('fs')
 
 const configDir = './data/db';
-const configPath = `${configDir}/config.json`;
+//const configPath = `${configDir}/config.json`;
 
 if (!fs.existsSync(configDir)) {
   fs.mkdirSync(configDir, { recursive: true });
 }
 
-const configExists = () => {
-  if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(configPath, JSON.stringify({}, null, 2));
+const configExists = (file) => {
+  if (!fs.existsSync(file)) {
+    fs.writeFileSync(file, JSON.stringify({}, null, 2));
   }
 };
 
 // Speichert ein Objekt in der JSON-Datei
-const saveConfig = (data) => fs.writeFileSync(configPath, JSON.stringify(data, null, 2));
+const saveFile = (file, data) => fs.writeFileSync(`${configDir}/${file}`, JSON.stringify(data, null, 2));
 
 // Lädt das Objekt aus der JSON-Datei
-const loadConfig = () => {
-  configExists();
-  return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const loadFile = (file) => {
+  configExists(`${configDir}/${file}`);
+  return JSON.parse(fs.readFileSync(`${configDir}/${file}`, 'utf8'));
 };
 
 function writeData(filename, data) {
@@ -111,6 +97,24 @@ function writeData(filename, data) {
   });
 }
 
+const addASecond = (time) => {
+  let [hours, minutes, seconds] = time.split(":").map(Number);
+  
+  seconds++; // Eine Sekunde hinzufügen
+  if (seconds >= 60) {
+    seconds = 0;
+    minutes++;
+  }
+  if (minutes >= 60) {
+    minutes = 0;
+    hours++;
+  }
+
+  // Formatierung sicherstellen, immer zweistellig
+  return [hours, minutes, seconds]
+    .map(unit => String(unit).padStart(2, "0"))
+    .join(":");
+};
 
 
-module.exports = { getPlaytimeFormat, getDateFormat, writeData, saveConfig, loadConfig, colorize };
+module.exports = { getPlaytimeFormat, getDateFormat, writeData, saveFile, loadFile, colorize, addASecond };

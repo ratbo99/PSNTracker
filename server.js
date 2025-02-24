@@ -11,9 +11,10 @@ const path = require('path');
 const fs = require('fs')
 
 //import helper functions
-const { getPlaytimeFormat, getDateFormat, writeData, saveConfig, loadConfig, colorize } = require('./utils');
+const { getPlaytimeFormat, getDateFormat, writeData, saveFile, loadFile, colorize, addASecond } = require('./utils');
 
-const config = loadConfig();
+const config = loadFile('config.json');
+const cache = loadFile('library.json');
 
 //starte den webserver
 var port = 3000;
@@ -35,7 +36,7 @@ const io = require('socket.io')(http, {
 io.on('connection', function (socket) {
   socket.on('showTrophies', function(data){
     config.showTrophies = data.showTrophies
-    saveConfig(config)
+    saveFile('config.json',config)
   });
 });
 
@@ -51,6 +52,11 @@ var lastPlayedGame = {}
 var trophySummary = {}
 var trophies = {}
 var trophyList = {}
+const interval = 10000; // aller x Sekunden PSN Api Call
+
+var timer = 0; // Startwert des Timers in Sekunden
+const resetTime = 15 * 60; // 15 Minuten in Sekunden
+var apiCalls = 0
 
 //create and save tokens to minimize api calls for logins
 const getToken = async () => {
@@ -74,13 +80,14 @@ const getToken = async () => {
             },
             body: `grant_type=refresh_token&scope=${SCOPE}&refresh_token=${tokens.refresh_token}&token_format=jwt`,
           });
-          
+ 
           const res = await response.json();
           var now= Math.round(+new Date()/1000);
           res.expires_in=now + res.expires_in;
           res.refresh_token_expires_in=tokens.refresh_token_expires_in;
           config.tokens=res
-          saveConfig(config)
+          saveFile('config.json',config)
+          apiCalls++;
           return res;
         } catch (err) {
           console.error(err.response.body);
@@ -88,7 +95,7 @@ const getToken = async () => {
       } else {
         console.error("Refresh Token abgelaufen. Neuen NPSSO Cookie eintragen.");
         delete config.tokens
-        saveConfig(config)
+        saveFile('config.json',config)
         getToken(); //app beenden?
       }
     }
@@ -101,7 +108,7 @@ const getToken = async () => {
       },
       redirect: "manual"
     });
-
+    apiCalls++; 
     const code = redirectResponse.headers.get("location").match(/code=([A-Za-z0-9:\?_\-\.\/=]+)/)[1];
 
     const tokenResponse = await fetch(`${AUTH_URI}/token`, {
@@ -120,7 +127,8 @@ const getToken = async () => {
     tokens.expires_in=now+tokens.expires_in;
     tokens.refresh_token_expires_in = now+tokens.refresh_token_expires_in;
     config.tokens = tokens
-    saveConfig(config)
+    saveFile('config.json',config)
+    apiCalls++;
     return tokens
   }
 };
@@ -140,18 +148,18 @@ const getAccountId = async (psnID) => {
     .then((data) => {
       config.psnLanguage = data.profile.languagesUsed[0].replace("de","de-DE")
       config.accountID = data.profile.accountId
-      saveConfig(config);
+      saveFile('config.json',config)
+      apiCalls++;
       return data.profile.accountId;
     })
     .catch((err) => {
       console.error("Unable to fetch -", err);
-    })
+    })  
 }
 
 const updateGame = async (game, changes) => { 
 
-        if (changes.length >= 1 || changes.includes("titleID")) {
-
+        if (changes.length >= 2 || changes.includes("titleID")) {
           const totalEarnedTrophies = Object.values(game.earnedTrophies).reduce((sum, value) => sum + value, 0);
           const totalDefinedTrophies = Object.values(game.definedTrophies).reduce((sum, value) => sum + value, 0);
           writeData(`data/titel.txt`,`${game.titleName} ${config.seperator} ${totalEarnedTrophies} / ${totalDefinedTrophies} ${config.seperator} ${game.progress}%`);
@@ -165,40 +173,42 @@ const updateGame = async (game, changes) => {
                 }
           });
 
-          trophySummary = await fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`);
-
-          readline.cursorTo(process.stdout, 0, 11);
-          process.stdout.clearLine(0);
-          process.stdout.write(`🎉 Level: ${trophySummary.trophyLevel} (${trophySummary.progress}%) | 💎 ${trophySummary.earnedTrophies.platinum} 🥇 ${trophySummary.earnedTrophies.gold} 🥈 ${trophySummary.earnedTrophies.silver} 🥉 ${trophySummary.earnedTrophies.bronze}`);
-          readline.cursorTo(process.stdout, 0, 13);
-          process.stdout.clearLine(0);
-          process.stdout.write(`🏆 ${game.titleName} (Fortschritt: ${game.progress}% | Spielzeit: ${game.playDuration} | Wie oft: ${game.playCount})\n`);
-          readline.cursorTo(process.stdout, 0, 14);
-          process.stdout.clearLine(0);
-          process.stdout.write(`💎 ${game.earnedTrophies.platinum}/${game.definedTrophies.platinum} 🥇 ${game.earnedTrophies.gold}/${game.definedTrophies.gold} 🥈 ${game.earnedTrophies.silver}/${game.definedTrophies.silver} 🥉 ${game.earnedTrophies.bronze}/${game.definedTrophies.bronze}\n`);
-
           io.sockets.emit("updateOverlay",game);
           getTrophies(playedGame);
 
+          trophySummary = await fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`);
         }
+
+        readline.cursorTo(process.stdout, 0, 11);
+        process.stdout.clearLine(0);
+        process.stdout.write(`🎉 Level: ${trophySummary.trophyLevel} (${trophySummary.progress}%) > 💎${trophySummary.earnedTrophies.platinum} 🥇${trophySummary.earnedTrophies.gold} 🥈${trophySummary.earnedTrophies.silver} 🥉${trophySummary.earnedTrophies.bronze}`);
+        readline.cursorTo(process.stdout, 0, 13);
+        process.stdout.clearLine(0);
+        process.stdout.write(`🏆 ${game.titleName} (Fortschritt: ${game.progress}% | Spielzeit: ${game.playDuration} | Wie oft: ${game.playCount})\n`);
+        readline.cursorTo(process.stdout, 0, 14);
+        process.stdout.clearLine(0);
+        process.stdout.write(`💎${game.earnedTrophies.platinum}/${game.definedTrophies.platinum} 🥇${game.earnedTrophies.gold}/${game.definedTrophies.gold} 🥈${game.earnedTrophies.silver}/${game.definedTrophies.silver} 🥉${game.earnedTrophies.bronze}/${game.definedTrophies.bronze}\n`);
 };
 
 async function checkForChanges() {
     
     var presence = await fetchPSNData(`${BASEURL}/userProfile/v1/internal/users/${config.accountID}/basicPresences?type=primary`);
     try {
+      var data = [];
       if(presence.basicPresence.gameTitleInfoList[0].npTitleId && presence.basicPresence.gameTitleInfoList[0].npTitleId != lastPlayedGame.titleID) {
         trophyList = {}
         playedGame.titleID = presence.basicPresence.gameTitleInfoList[0].npTitleId;
-        playedGame.titleName = presence.basicPresence.gameTitleInfoList[0].titleName;
+        playedGame.titleName = presence.basicPresence.gameTitleInfoList[0].titleName;        
       }
-  
-      var data = [];
-      data.push(await fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/titles/trophyTitles?npTitleIds=${playedGame.titleID}`));
-      data.push(await fetchPSNData(`${BASEURL}/gamelist/v2/users/${config.accountID}/titles?categories=ps4_game,ps5_native_game&limit=1&offset=0`));
 
-      playedGame.playDuration = getPlaytimeFormat(data[1].titles[0].playDuration)
-      playedGame.playCount = data[1].titles[0].playCount;
+      data.push(await fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/titles/trophyTitles?npTitleIds=${playedGame.titleID}`));
+
+      if(playedGame.titleID != lastPlayedGame.titleID) {
+        data.push(await fetchPSNData(`${BASEURL}/gamelist/v2/users/${config.accountID}/titles?categories=ps4_game,ps5_native_game&limit=1&offset=0`));
+        playedGame.playDuration = getPlaytimeFormat(data[1].titles[0].playDuration)
+        playedGame.playCount = data[1].titles[0].playCount;
+      };
+
       try {playedGame.progress = data[0].titles[0].trophyTitles[0].progress } catch { playedGame.progress = 0 }
       try {playedGame.earnedTrophies = data[0].titles[0].trophyTitles[0].earnedTrophies} catch { playedGame.earnedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} }
       try {playedGame.definedTrophies = data[0].titles[0].trophyTitles[0].definedTrophies } catch { playedGame.definedTrophies = {bronze: 0, silver: 0, gold: 0, platinum: 0} }
@@ -270,23 +280,50 @@ async function getTrophies(game) {
 
 const fetchPSNData = async (url) => {
   const tokens = await getToken(); 
-  return fetch(url, {
-    method: "GET", // Specify request method
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${tokens.access_token}`,
-      "Accept-Language": "de-DE",
-    },
-    responseType: "json"
-  })
-    .then((res) => res.json() )
-    .then((data) => {
-      return data            
-    })
-    .catch((err) => {
-      console.log("Unable to fetch -", err);
-    })     
+  try {
+    const tokens = await getToken();
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokens.access_token}`,
+        "Accept-Language": "de-DE",
+      },
+      responseType: "json"
+    });
+
+    //console.log("Statuscode:", response.status); // Gibt den Statuscode aus
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    apiCalls++;
+    return data;
+  } catch (err) {
+    console.log("Unable to fetch -", err);
+  }
+
 };
+
+const fetchLibrary = async (offset, limit, totalItemCount) => {
+  //console.log(offset, limit, totalItemCount)
+  let allData = [];
+
+  while (offset < totalItemCount) {
+    const url = `https://web.np.playstation.com/api/graphql/v1/op?operationName=getPurchasedGameList&variables={"isActive":true,"platform":["psvita","ps3","ps4","ps5"],"start":${offset},"size":${limit},"sortBy":"ACTIVE_DATE","sortDirection":"desc","subscriptionService":"NONE"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"2c045408b0a4d0264bb5a3edfed4efd49fb4749cf8d216be9043768adff905e2"}}`;
+
+    const data = await fetchPSNData(url);
+    allData = allData.concat(data.data.purchasedTitlesRetrieve.games); // Passe das je nach API-Response-Format an 
+
+    offset += limit;
+  }
+
+
+
+  return allData;
+}
 
 function getChangedKeys(obj1, obj2) {
   function flattenObject(obj, prefix = '') {
@@ -349,7 +386,7 @@ const init = async () => {
     config.showTrophies = true
     config.port = port
 
-    saveConfig(config);
+    saveFile('config.json',config)
 
   } catch (error) {
     console.error('Fehler:', error);
@@ -365,22 +402,45 @@ function splashscreen() {
   console.info(`Server läuft auf Port: ${config.port} - ändern in config.json\n`);  
   console.group("Öffne:");
   console.log(colorize(`Trophäenoverlay > http://localhost:${config.port}`,"green"));
-  console.log(colorize(`Trophäenliste > http://localhost:${config.port}/trophies\n`,"green"));
+  console.log(colorize(`Trophäenliste > http://localhost:${config.port}/trophies`,"green"));
+  console.log(colorize(`Gekaufte Spiele > http://localhost:${config.port}/library`,"green"));
   console.groupEnd();
 
   fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`).then((data) => {
     trophySummary = data;
     writeData(`data/platingesamt.txt`,trophySummary.earnedTrophies.platinum);
-
     readline.cursorTo(process.stdout, 0, 11);
     process.stdout.clearLine(0);
-    process.stdout.write(`🎉 Level: ${trophySummary.trophyLevel} (${trophySummary.progress}%) | 💎 ${trophySummary.earnedTrophies.platinum} 🥇 ${trophySummary.earnedTrophies.gold} 🥈 ${trophySummary.earnedTrophies.silver} 🥉 ${trophySummary.earnedTrophies.bronze}`);
-    
+    process.stdout.write(`🎉 Level: ${trophySummary.trophyLevel} (${trophySummary.progress}%) > 💎${trophySummary.earnedTrophies.platinum} 🥇${trophySummary.earnedTrophies.gold} 🥈${trophySummary.earnedTrophies.silver} 🥉${trophySummary.earnedTrophies.bronze}`);
   });
 
   // Starte Intervall
-  setInterval(checkForChanges, "10000");
+  checkForChanges();
+  setInterval(checkForChanges, interval);
+
 }
+
+//statusbar output & playDzration Timer
+setInterval(() => {
+  const minutes = Math.floor(timer / 60);
+  const seconds = timer % 60;
+  readline.cursorTo(process.stdout, 0, 20);
+  process.stdout.clearLine(0);
+  let status=` 🕒 ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}: ${apiCalls} PSN API Aufrufe (Ratelimit: 300 / 15 Minuten)`
+  process.stdout.write(`\x1b[44m\x1b[37m ${status.padEnd(60, ' ')} \x1b[0m`)
+  timer++;
+  if (timer >= resetTime) {
+    timer = 0; // Reset nach 15 Minuten
+    apiCalls = 0;
+  }
+  if(playedGame.playDuration) {
+    playedGame.playDuration=addASecond(playedGame.playDuration)
+    readline.cursorTo(process.stdout, 0, 13);
+    process.stdout.clearLine(0);
+    process.stdout.write(`🏆 ${playedGame.titleName} (Fortschritt: ${playedGame.progress}% | Spielzeit: ${playedGame.playDuration} | Wie oft: ${playedGame.playCount})\n`); 
+  }
+}, 1000);
+
 
 if(config.hasOwnProperty('accountID')) {
   splashscreen()
@@ -415,11 +475,10 @@ function logErrorToFile(error) {
 // Uncaught Exceptions abfangen - error Logging nach PSN Ausfall am 8.2.2025 hinzugefügt
 process.on('uncaughtException', (error) => {
     logErrorToFile(error);
-    readline.cursorTo(process.stdout, 0, 16);
+    readline.cursorTo(process.stdout, 0, 21);
     process.stdout.clearLine(0);
-    process.stdout.write(colorize(`Uncaught Exception! Siehe error.log`,"red"))
-   
-    //process.exit(1); // Beendet das Programm mit Fehlercode
+    let status=` ❕ Uncaught Exception! Siehe error.log`
+    process.stdout.write(`\x1b[41m\x1b[37m ${status.padEnd(60, ' ')}\x1b[0m`)
 });
 
 //trophy overlay - zeigt erspielte Trophäen
@@ -430,6 +489,54 @@ app.get('/', function (req, res) {
     res.render('overlay', {title: 'Overlay', game: playedGame, count: 0});
   }
  });
+
+
+ app.get('/library/:offset?/:limit?', async (req, res) => {
+
+  const offset = req.params.offset || 0;  // Standardwert 0, falls nicht angegeben
+  const limit = req.params.limit || 100;   // Standardwert 10, falls nicht angegeben
+
+    let libraryUrl = `https://web.np.playstation.com/api/graphql/v1/op?operationName=getPurchasedGameList&variables={"isActive":true,"platform":["psvita","ps3","ps4","ps5"],"start":0,"size":1,"sortBy":"ACTIVE_DATE","sortDirection":"desc","subscriptionService":"NONE"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"2c045408b0a4d0264bb5a3edfed4efd49fb4749cf8d216be9043768adff905e2"}}`
+  
+    const response = await fetchPSNData(libraryUrl)
+    if (cache.totalCount !== response.data.purchasedTitlesRetrieve.pageInfo.totalCount) {
+      // Cache aktualisieren
+      cache.totalCount = response.data.purchasedTitlesRetrieve.pageInfo.totalCount;  
+      await fetchLibrary(offset, limit, cache.totalCount)
+        .then(allItems => {
+          
+          const mergedGames = allItems.reduce((acc, game) => {
+            const existingGame = acc.find(g => g.name.toLowerCase().replace(/[^\w\s]/gi, '') === game.name.toLowerCase().replace(/[^\w\s]/gi, ''));
+          
+            if (existingGame) {
+              if (!existingGame.platforms.includes(game.platform)) {
+                existingGame.platforms.push(game.platform);
+              }
+            } else {
+              acc.push({
+                ...game,
+                platforms: [game.platform],
+                subscriptionService: game.subscriptionService === "NONE" ? '' : game.subscriptionService
+              });
+            }
+          
+            return acc;
+          }, []);
+          
+          // Die Plattformen in einen lesbaren String formatieren
+          const result = mergedGames.map(game => ({
+            ...game,
+            platform: game.platforms.join(', ')
+          }));
+
+          cache.data=result;
+          saveFile('library.json',cache)
+        })
+        .catch(err => console.error('Fehler beim Abrufen:', err));
+    }
+
+    res.render('library', {title: 'Library', games: cache.data, count: cache.data.length, });
+});
 
  //zeigt trophäenliste zum gepeilten Spiel
  app.get('/trophies', function (req, res) {
