@@ -1,0 +1,26 @@
+extends _default
+block content
+        div.container
+                    div.head
+                        div.Title.grow Store Bibliothek
+                        div
+                            input.search(type="text" id="filterInput" placeholder="Suchbegriff eingeben...")
+                        div
+                            div.switch 
+                                input.look(id="checkbox1" type="checkbox" onclick="showRandom()")
+                                label(for="checkbox1" id="label")
+                        div.Title.count #{count} Einträge
+          
+                    if count > 0
+                        each game in games
+                            span(id=game.titleId)
+                                div.Trophy
+                                    img(src=game.image.url)
+                                    div.grow
+                                        div.Title #{game.name}
+                                        div.Text #{game.platform}
+                                    if game.subscriptionService
+                                        div
+                                            img(src="../img/"+game.subscriptionService+".png" class="plus") 
+
+                                        
