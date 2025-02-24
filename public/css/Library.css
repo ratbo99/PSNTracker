@@ -72,16 +72,7 @@ body {
   margin-top:-12px;
   position: relative;
   }
-  
-  div.earned {
-  background-color:#fff;
-  padding:5px;
-  border-radius:10px;
-  height:fit-content;
-  position:relative;
-  top:60px
-  }
-  
+    
   img {
   position:relative;
   z-index:19;
@@ -132,4 +123,18 @@ body {
   
   .switch .look:checked + label {
   background-color:#b0c4de;
+  }
+
+  .search {
+    color: #000000;
+    background-color: #ededed;
+    font-family: inherit;
+    font-size: inherit;
+    margin-bottom: 6px;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    margin-right: 35px;
+    width: 300px;
   }
