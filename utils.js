@@ -64,6 +64,8 @@ const fs = require('fs')
 const configDir = './data/db';
 //const configPath = `${configDir}/config.json`;
 
+const baseCacheDir = './data/db/cache'
+
 if (!fs.existsSync(configDir)) {
   fs.mkdirSync(configDir, { recursive: true });
 }
@@ -117,4 +119,52 @@ const addASecond = (time) => {
 };
 
 
-module.exports = { getPlaytimeFormat, getDateFormat, writeData, saveFile, loadFile, colorize, addASecond };
+http = require('http'),
+https = require('https');
+var Stream = require('stream').Transform;
+
+// Funktion zum Erstellen von Unterordnern (library, trophies etc.)
+function ensureCacheFolder(subfolder) {
+  const folderPath = path.join(baseCacheDir, subfolder);
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+  return folderPath;
+}
+
+// Bild herunterladen und im spezifischen Ordner speichern
+async function cacheImage(url, subfolder, file) {
+  const cacheDir = ensureCacheFolder(subfolder);
+  const filePath = path.join(cacheDir, file+".png");
+
+  if (fs.existsSync(filePath)) {
+    //console.log('Serving from cache:', filePath);
+    return './' + filePath.replace(/\\/g, '/');
+  }
+
+  try {
+    var client = http;
+    if (url.toString().indexOf("https") === 0){
+      client = https;
+     }
+  
+    client.request(url, function(response) {                                        
+      var data = new Stream();                                                    
+  
+      response.on('data', function(chunk) {                                       
+         data.push(chunk);                                                         
+      });                                                                         
+  
+      response.on('end', function() {                                           
+         fs.writeFileSync(filePath, data.read());                               
+      });                                                                         
+   }).end();
+    //console.log('Fetched and cached:', filePath);
+    return './' + filePath.replace(/\\/g, '/');
+  } catch (error) {
+    //console.error('Error fetching image:', error);
+    return url; // Fallback zur Original-URL
+  }
+}
+
+module.exports = { getPlaytimeFormat, getDateFormat, writeData, saveFile, loadFile, colorize, addASecond, cacheImage };

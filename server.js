@@ -11,10 +11,10 @@ const path = require('path');
 const fs = require('fs')
 
 //import helper functions
-const { getPlaytimeFormat, getDateFormat, writeData, saveFile, loadFile, colorize, addASecond } = require('./utils');
+const { getPlaytimeFormat, getDateFormat, writeData, saveFile, loadFile, colorize, addASecond, cacheImage } = require('./utils');
 
 const config = loadFile('config.json');
-const cache = loadFile('library.json');
+var cache = loadFile('library.json');
 
 //starte den webserver
 var port = 3000;
@@ -191,8 +191,10 @@ const updateGame = async (game, changes) => {
 };
 
 async function checkForChanges() {
-    
+  
+  try {
     var presence = await fetchPSNData(`${BASEURL}/userProfile/v1/internal/users/${config.accountID}/basicPresences?type=primary`);
+    
     try {
       var data = [];
       if(presence.basicPresence.gameTitleInfoList[0].npTitleId && presence.basicPresence.gameTitleInfoList[0].npTitleId != lastPlayedGame.titleID) {
@@ -237,6 +239,11 @@ async function checkForChanges() {
       playedGame = {}
       trophyList = {}
     }
+ 
+  } catch (err) {
+    // Kein weiteres Logging im Terminal
+  }
+
 }
 
 async function getTrophies(game) {
@@ -294,7 +301,7 @@ const fetchPSNData = async (url) => {
     //console.log("Statuscode:", response.status); // Gibt den Statuscode aus
 
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      //throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
     const data = await response.json();
@@ -318,8 +325,6 @@ const fetchLibrary = async (offset, limit, totalItemCount) => {
 
     offset += limit;
   }
-
-
 
   return allData;
 }
@@ -394,6 +399,16 @@ const init = async () => {
     return config.psnID
   }
 };
+
+const saveCache = async (cache, subfolder) => {
+    for (let i = 0; i < cache.data.length; i++) {
+      const game = cache.data[i];
+      const oldUrl = game.image.url;
+      const newUrl = await cacheImage(oldUrl,subfolder,game.titleId);
+      game.image.url = newUrl;
+    }
+    saveFile('library.json',cache)
+}
 
 function splashscreen() {
   console.clear();
@@ -493,7 +508,7 @@ app.get('/', function (req, res) {
  app.get('/library/:offset?/:limit?', async (req, res) => {
 
   const offset = req.params.offset || 0;  // Standardwert 0, falls nicht angegeben
-  const limit = req.params.limit || 100;   // Standardwert 10, falls nicht angegeben
+  const limit = req.params.limit || 100;   // Standardwert 100, falls nicht angegeben
 
     let libraryUrl = `https://web.np.playstation.com/api/graphql/v1/op?operationName=getPurchasedGameList&variables={"isActive":true,"platform":["psvita","ps3","ps4","ps5"],"start":0,"size":1,"sortBy":"ACTIVE_DATE","sortDirection":"desc","subscriptionService":"NONE"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"2c045408b0a4d0264bb5a3edfed4efd49fb4749cf8d216be9043768adff905e2"}}`
   
@@ -529,18 +544,30 @@ app.get('/', function (req, res) {
           }));
 
           cache.data=result;
-          saveFile('library.json',cache)
+          saveCache(cache,'library');
+
         })
         .catch(err => console.error('Fehler beim Abrufen:', err));
+    } else {
+      //console.log(cache.data)
     }
 
     res.render('library', {title: 'Library', games: cache.data, count: cache.data.length, });
 });
 
  //zeigt trophäenliste zum gepeilten Spiel
- app.get('/trophies', function (req, res) {
+ app.get('/trophies', async (req, res) => {
   if(playedGame.hasOwnProperty('titleID')) {
     try {res.render('trophies', {title: 'Trophies', game: playedGame, trophies: trophies, count: trophies.length, unearnedCount: trophies.filter(trophy => !trophy.earned).length, showTrophies: config.showTrophies}); } catch (err) { console.log(err) }
+    
+    if (!fs.existsSync("./db/cache/trophies/"+playedGame.titleID + "_1.png")) {
+
+        const promises = trophies.map(async (trophy) => {
+        const newUrl = await cacheImage(trophy.trophyIconUrl, 'trophies', playedGame.titleID + "_" + trophy.trophyId);
+        trophy.trophyIconUrl = newUrl;
+        await Promise.all(promises);
+      });
+    }
   } else {
     res.render('trophies', {title: 'Trophies', game: playedGame, trophies: trophies, count: 0, unearnedCount: 0});
   }
