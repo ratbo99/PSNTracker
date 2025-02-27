@@ -33,7 +33,6 @@ function getPlaytimeFormat(timestr) {
   } else {
     return null
   }
-
 }
 
 //Funktion zum Normalisieren des Datums
@@ -52,10 +51,9 @@ function getDateFormat(dateString) {
     const ss = String(date.getSeconds()).padStart(2, '0');
 
     return `${dd}.${mm}.${yyyy} ${hh}:${min}:${ss}`;
-   } catch {
-
+   } catch (error) {
+      console.error(error);
    }
-
 }
 
 const path = require('path');
@@ -119,8 +117,8 @@ const addASecond = (time) => {
 };
 
 
-http = require('http'),
-https = require('https');
+var http = require('http');
+var https = require('https');
 var Stream = require('stream').Transform;
 
 // Funktion zum Erstellen von Unterordnern (library, trophies etc.)
@@ -162,7 +160,7 @@ async function cacheImage(url, subfolder, file) {
     //console.log('Fetched and cached:', filePath);
     return './' + filePath.replace(/\\/g, '/');
   } catch (error) {
-    //console.error('Error fetching image:', error);
+    console.error('Error fetching image:', error);
     return url; // Fallback zur Original-URL
   }
 }
