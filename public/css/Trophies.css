@@ -14,7 +14,7 @@ body {
 }
 .container {
   position:absolute;
-  overflow:hidden;
+  /* overflow:hidden; */
   left:50%;
   transform:translate(-50%,0);
   width:75%;

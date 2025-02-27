@@ -4,15 +4,15 @@ body {
 	min-height: 100vh;
 	margin: 0px;
 	overflow: hidden;
-      font-family:  "Open Sans";
-	  line-height: 1.4;
-	  max-width: 800px;
-	  margin: 20px auto;
-	  padding: 0 10px;
-	  word-wrap: break-word;
-	  color: #dbdbdb;
-	  background: #202b38;
-	  text-rendering: optimizeLegibility;
+	font-family:  "Open Sans";
+	line-height: 1.4;
+	max-width: 800px;
+	margin: 20px auto;
+	padding: 0 10px;
+	word-wrap: break-word;
+	color: #dbdbdb;
+	background: #202b38;
+	text-rendering: optimizeLegibility;
 }	
 .container {			
 	position: absolute;
