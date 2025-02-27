@@ -1,11 +1,11 @@
 const colors = {
-  red: "\x1b[31m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  blue: "\x1b[34m",
-  magenta: "\x1b[35m",
-  cyan: "\x1b[36m",
-  reset: "\x1b[0m",
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+  reset: '\x1b[0m',
 };
 
 function colorize(text, color) {
@@ -16,14 +16,14 @@ function colorize(text, color) {
 function getPlaytimeFormat(timestr) {
   if(timestr) 
   {
-    if (timestr === "PT0S") return "00:00:00";
+    if (timestr === 'PT0S') return '00:00:00';
   
     const getMatch = (regex) => {
       const match = timestr.match(regex);
       return match ? match[1] : 0;
     };
   
-    const padZero = (num) => (num < 10 ? "0" + num : num);
+    const padZero = (num) => (num < 10 ? '0' + num : num);
   
     const hours = padZero(getMatch(/T(\d+)H/));
     const minutes = padZero(getMatch(/(?:H|T)(\d+)M/));
@@ -31,7 +31,7 @@ function getPlaytimeFormat(timestr) {
   
     return `${hours}:${minutes}:${seconds}`;
   } else {
-    return null
+    return null;
   }
 }
 
@@ -57,12 +57,12 @@ function getDateFormat(dateString) {
 }
 
 const path = require('path');
-const fs = require('fs')
+const fs = require('fs');
 
 const configDir = './data/db';
 //const configPath = `${configDir}/config.json`;
 
-const baseCacheDir = './data/db/cache'
+const baseCacheDir = './data/db/cache';
 
 if (!fs.existsSync(configDir)) {
   fs.mkdirSync(configDir, { recursive: true });
@@ -98,7 +98,7 @@ function writeData(filename, data) {
 }
 
 const addASecond = (time) => {
-  let [hours, minutes, seconds] = time.split(":").map(Number);
+  let [hours, minutes, seconds] = time.split(':').map(Number);
   
   seconds++; // Eine Sekunde hinzufügen
   if (seconds >= 60) {
@@ -112,8 +112,8 @@ const addASecond = (time) => {
 
   // Formatierung sicherstellen, immer zweistellig
   return [hours, minutes, seconds]
-    .map(unit => String(unit).padStart(2, "0"))
-    .join(":");
+    .map(unit => String(unit).padStart(2, '0'))
+    .join(':');
 };
 
 
@@ -133,7 +133,7 @@ function ensureCacheFolder(subfolder) {
 // Bild herunterladen und im spezifischen Ordner speichern
 async function cacheImage(url, subfolder, file) {
   const cacheDir = ensureCacheFolder(subfolder);
-  const filePath = path.join(cacheDir, file+".png");
+  const filePath = path.join(cacheDir, file+'.png');
 
   if (fs.existsSync(filePath)) {
     //console.log('Serving from cache:', filePath);
@@ -142,7 +142,7 @@ async function cacheImage(url, subfolder, file) {
 
   try {
     var client = http;
-    if (url.toString().indexOf("https") === 0){
+    if (url.toString().indexOf('https') === 0){
       client = https;
      }
   
