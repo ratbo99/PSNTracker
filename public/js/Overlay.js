@@ -2,8 +2,8 @@ var socket = io(window.location.origin);
 
 
 socket.on('updateOverlay', function (data) {
-    console.log(data)
-    updateOverlay()
+    console.log(data);
+    updateOverlay();
 });
 
 async function updateOverlay() {

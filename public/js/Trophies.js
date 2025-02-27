@@ -1,13 +1,15 @@
-var socket = io(window.location.origin);
+var socket = io(window.location.origin); 
 
 socket.on('updateTrophies', function (data) {
- loadTrophies()
+    console.log(data);
+    loadTrophies();
 });
 
+
 function showTrophies(check) {
-  var isChecked = document.getElementById("checkbox1").checked
+  var isChecked = document.getElementById('checkbox1').checked;
   socket.emit('showTrophies', { showTrophies: isChecked});
-  loadTrophies()
+  loadTrophies();
 }
 
 async function loadTrophies() {

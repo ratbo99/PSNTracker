@@ -1,4 +1,5 @@
 let isHidden = false; // Status-Tracker
+
 function showRandom() {
     const spans = document.querySelectorAll('span');
     
