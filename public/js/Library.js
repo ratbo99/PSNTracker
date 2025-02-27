@@ -1,26 +1,3 @@
-let isHidden = false; // Status-Tracker
-function showRandom() {
-    const spans = document.querySelectorAll('span');
-    
-    if (!isHidden) {
-      // Alle ausblenden
-      spans.forEach(span => {
-        span.style.display = 'none';
-      });
-  
-      // Zufälliges Element auswählen und einblenden
-      const randomIndex = Math.floor(Math.random() * spans.length);
-      spans[randomIndex].style.display = 'block';
-      isHidden = true;
-    } else {
-      // Alle wieder einblenden
-      spans.forEach(span => {
-        span.style.display = 'block';
-      });
-      isHidden = false;
-    }
-  }
-
   document.addEventListener('DOMContentLoaded', () => {
     // Funktion zum Filtern der <span>-Elemente und Zähler aktualisieren
     function filterSpans(searchString) {
