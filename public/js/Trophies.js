@@ -1,8 +1,9 @@
 var socket = io(window.location.origin); 
 
-socket.on('updateTrophies', function (data) {
-    console.log(data);
-    loadTrophies();
+const searchParam = window.location.pathname.split('/');
+
+socket.on('updateTrophies', function () {  
+    if(!searchParam[2]) loadTrophies();
 });
 
 
