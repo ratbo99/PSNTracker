@@ -1,6 +1,6 @@
 {
   "name": "psn-trophy-tracker",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "RatBo's - PSN Tracker",
   "main": "server.js",
   "scripts": {
@@ -14,9 +14,6 @@
       "public/**/*",
       "views/**/*"
     ]
-  },
-  "env": {
-    "NODE_OPTIONS": "--network-family-autoselection-attempt-timeout=500"
   },
   "keywords": [
     "twitch",
