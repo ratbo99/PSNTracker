@@ -137,7 +137,7 @@ async function cacheImage(url, subfolder, file) {
 
   if (fs.existsSync(filePath)) {
     //console.log('Serving from cache:', filePath);
-    return './' + filePath.replace(/\\/g, '/');
+    return '/' + filePath.replace(/\\/g, '/');
   }
 
   try {
@@ -158,7 +158,8 @@ async function cacheImage(url, subfolder, file) {
       });                                                                         
    }).end();
     //console.log('Fetched and cached:', filePath);
-    return './' + filePath.replace(/\\/g, '/');
+    // return './' + filePath.replace(/\\/g, '/');
+    return url;
   } catch (error) {
     console.error('Error fetching image:', error);
     return url; // Fallback zur Original-URL
