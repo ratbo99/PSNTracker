@@ -1,0 +1,9 @@
+# Ordner ausschließen
+node_modules/
+data/
+Release/
+
+# Bestimmte Dateitypen ausschließen
+*.code-workspace
+package-lock.json
+eslint.config.mjs

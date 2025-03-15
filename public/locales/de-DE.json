@@ -1,0 +1,18 @@
+{
+  "server_info": "Server läuft auf Port: {{port}} - ändern in data/db/config.json",
+  "server_error": "Fehler",
+  "server_failed_attempts": "Versuch {{attempts}} fehlgeschlagen",
+  "server_failed_all": "Alle Versuche fehlgeschlagen.",
+  "config_input": "Bitte psnID, NPSSO Cookie eingeben!",
+  "open": "Öffne:",
+  "trophy_overlay": "Trophäenoverlay",
+  "trophy_list": "Trophäenliste",
+  "library": "Gekaufte Spiele",
+  "no_game": "kein Spiel gestartet",
+  "api_info": "PSN API Aufrufe (Ratelimit: 300 / 15 Minuten)",
+  "game_progress": "Fortschritt",
+  "game_playtime": "Spielzeit",
+  "game_how_often": "Wie oft",
+  "search": "Suchen...",
+  "entries": "Einträge"
+}

@@ -19,6 +19,8 @@ var cache = loadFile('library.json');
 const fetch = require('node-fetch');
 
 
+const readline = require('readline');
+
 
 //starte den webserver
 var port = 3000;
@@ -61,6 +63,8 @@ const interval = 10000; // aller x Sekunden PSN Api Call
 var timer = 0; // Startwert des Timers in Sekunden
 const resetTime = 15 * 60; // 15 Minuten in Sekunden
 var apiCalls = 0;
+
+const translations = JSON.parse(fs.readFileSync(`./public/locales/${config.psnLanguage}.json`, 'utf8'));
 
 //create and save tokens to minimize api calls for logins
 const getToken = async () => {
@@ -168,7 +172,7 @@ const updateGame = async (game, lastPlayedGame) => {
   if (changes.length > 0) {
     const totalEarnedTrophies = Object.values(game.earnedTrophies).reduce((sum, value) => sum + value, 0);
     const totalDefinedTrophies = Object.values(game.definedTrophies).reduce((sum, value) => sum + value, 0);
-    writeData('data/titel.txt',`${game.titleName} ${config.seperator} ${totalEarnedTrophies} / ${totalDefinedTrophies} ${config.seperator} ${game.progress}%`);
+    writeData('data/title.txt',`${game.titleName} ${config.seperator} ${totalEarnedTrophies} / ${totalDefinedTrophies} ${config.seperator} ${game.progress}%`);
     changes.forEach(change => {
       let str = `${game.earnedTrophies[change]}/${game.definedTrophies[change]}`;                  
       writeData(`data/${change}.txt`,str);
@@ -189,7 +193,7 @@ const updateGame = async (game, lastPlayedGame) => {
  
    readline.cursorTo(process.stdout, 0, 13);
    process.stdout.clearLine(0);
-   process.stdout.write(`🏆 ${game.titleName} (Fortschritt: ${game.progress}% | Spielzeit: ${game.playDuration} | Wie oft: ${game.playCount})\n`);
+   process.stdout.write(`🏆 ${game.titleName} (${translations.game_progress}: ${game.progress}% | ${translations.game_playtime}: ${game.playDuration} | ${translations.game_how_often}: ${game.playCount})\n`);
  
    readline.cursorTo(process.stdout, 0, 14);
    process.stdout.clearLine(0);
@@ -240,7 +244,7 @@ async function checkForChanges() {
   } catch (err) {
       readline.cursorTo(process.stdout, 0, 13);
       process.stdout.clearLine(0);
-      process.stdout.write(colorize('kein Spiel gestartet','red'));
+      process.stdout.write(colorize(translations.no_game,'red'));
       readline.cursorTo(process.stdout, 0, 14);
       process.stdout.clearLine(0);
 
@@ -252,8 +256,8 @@ async function checkForChanges() {
       io.sockets.emit('updateTrophies',1);
       
       if (!noGame) {
-        ['platinum', 'gold', 'silver', 'bronze', 'titel'].forEach(type => {
-          writeData(`data/${type}.txt`, type === 'titel' ? 'kein Spiel gestartet' : '0 / 0');
+        ['platinum', 'gold', 'silver', 'bronze', 'title'].forEach(type => {
+          writeData(`data/${type}.txt`, type === 'title' ? translations.no_game : '0 / 0');
         });
         noGame = true;
       }
@@ -327,18 +331,19 @@ const fetchPSNData = async (url, retries = 3, delay = 1000) => {
 
       if (!response.ok) {
         //throw new Error(`HTTP error! Status: ${response.status}`);
-        Promise.reject(new Error(`HTTP error! Status: ${response.status}`));
+        Promise.reject(new Error(`HTTP ${translations.server_error}! Status: ${response.status}`));
       }
 
       const data = await response.json();
       apiCalls++;
       return data;
     } catch (error) {
-      console.log(`Attempt ${attempt} failed:`, url, error.message);
+      console.log(translations.server_failed_attempts.replace('{{attempts}}', attempt), url, error.message);
+      //console.log(`Attempt ${attempt} failed:`, url, error.message);
       if (attempt < retries) {
         await new Promise(resolve => setTimeout(resolve, delay));
       } else {
-        throw new Error('All retries failed.');
+        throw new Error(translations.server_failed_all);
       }
     }
   }
@@ -375,7 +380,6 @@ const fetchLibrary = async (offset, limit, totalItemCount) => {
   return allData;
 };
 
-const readline = require('readline');
 
 // Erstellen eines Readline-Interface
 const rl = readline.createInterface({
@@ -394,7 +398,7 @@ const askQuestion = (question) => {
 
 const init = async () => {
   try {
-    console.log('Bitte psnID, NPSSO Cookie eingeben!');
+    console.log(translations.config_input);
     var psnID = await askQuestion('psnID: ');
     var psnNPSSO = await askQuestion('npsso: ');
 
@@ -410,7 +414,7 @@ const init = async () => {
     return config.psnID;
 
   } catch (error) {
-    console.error('Fehler:', error);
+    console.error(`${translations.server_error}`, error);
   }
 };
 
@@ -424,15 +428,20 @@ const saveCache = async (cache, subfolder) => {
     saveFile('library.json',cache);
 };
 
+
+
 function splashscreen() {
+  
   console.clear();
   console.info(colorize('+--+-+-+RatBo\'s+-+-+--+\r\n| P S N T r a c k e r |\r\n+--+-+-+-+-+-+-+-+-+--+\n','blue'));
-  console.info(`Server läuft auf Port: ${config.port} - ändern in config.json\n`);  
-  console.group('Öffne:');
-  console.log(colorize(`Trophäenoverlay > http://localhost:${config.port}`,'green'));
-  console.log(colorize(`Trophäenliste > http://localhost:${config.port}/trophies`,'green'));
-  console.log(colorize(`Gekaufte Spiele > http://localhost:${config.port}/library`,'green'));
+  console.info(translations.server_info.replace('{{port}}', config.port)+'\n');  
+  console.group(translations.open);
+  console.log(colorize(`${translations.trophy_overlay} > http://localhost:${config.port}`,'green'));
+  console.log(colorize(`${translations.trophy_list} > http://localhost:${config.port}/trophies`,'green'));
+  console.log(colorize(`${translations.library} > http://localhost:${config.port}/library`,'green'));
   console.groupEnd();
+
+  //out(translations.server_info.replace('{{port}}', config.port));
 
   fetchPSNData(`${BASEURL}/trophy/v1/users/${config.accountID}/trophySummary`).then((data) => {
     trophySummary = data;
@@ -451,7 +460,7 @@ function splashscreen() {
     const seconds = timer % 60;
     readline.cursorTo(process.stdout, 0, 20);
     process.stdout.clearLine(0);
-    let status=` 🕒 ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}: ${apiCalls} PSN API Aufrufe (Ratelimit: 300 / 15 Minuten)`;
+    let status=` 🕒 ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}: ${apiCalls} ${translations.api_info}`;
     process.stdout.write(`\x1b[44m\x1b[37m ${status.padEnd(60, ' ')} \x1b[0m`);
     timer++;
     if (timer >= resetTime) {
@@ -462,7 +471,7 @@ function splashscreen() {
       playedGame.playDuration=addASecond(playedGame.playDuration);
       readline.cursorTo(process.stdout, 0, 13);
       process.stdout.clearLine(0);
-      process.stdout.write(`🏆 ${playedGame.titleName} (Fortschritt: ${playedGame.progress}% | Spielzeit: ${playedGame.playDuration} | Wie oft: ${playedGame.playCount})\n`); 
+      process.stdout.write(`🏆 ${playedGame.titleName} (${translations.game_progress}: ${playedGame.progress}% | ${translations.game_playtime}: ${playedGame.playDuration} | ${translations.game_how_often}: ${playedGame.playCount})\n`); 
     }
   }, 1000);
 
@@ -517,7 +526,9 @@ app.get('/', function (req, res) {
  });
 
  app.get('/library/:offset?/:limit?', async (req, res) => {
-
+  res.locals.library = translations.library;
+  res.locals.search = translations.search;
+  res.locals.entries = translations.entries;
   const offset = req.params.offset || 0;  // Standardwert 0, falls nicht angegeben
   const limit = req.params.limit || 100;   // Standardwert 100, falls nicht angegeben
 
@@ -567,13 +578,12 @@ app.get('/', function (req, res) {
 
  //zeigt trophäenliste zum gepeilten Spiel
  app.get('/trophies', async (req, res) => {
+    res.locals.no_game = translations.no_game;
     if(playedGame.hasOwnProperty('titleID')) {
       for (let trophy of trophies) {
         trophy.trophyIconUrl = await cacheImage(trophy.trophyIconUrl, 'trophies', playedGame.titleID + '_' + trophy.trophyId);
       }
-  
-      res.render('trophies', {title: 'Trophies', game: playedGame, trophies: trophies, count: trophies.length, unearnedCount: trophies.filter(trophy => !trophy.earned).length, showTrophies: config.showTrophies});   
-      
+      res.render('trophies', {title: 'Trophies', game: playedGame, trophies: trophies, count: trophies.length, unearnedCount: trophies.filter(trophy => !trophy.earned).length, showTrophies: config.showTrophies});        
     } else {
       res.render('trophies', {title: 'Trophies', game: playedGame, trophies: trophies, count: 0, unearnedCount: 0});
     }
