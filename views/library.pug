@@ -2,14 +2,14 @@ extends _default
 block content
         div.container
                     div.head
-                        div.Title.grow Store Bibliothek
+                        div.Title.grow #{library}
                         div
-                            input.search(type="text" id="filterInput" placeholder="Suchbegriff eingeben...")
+                            input.search(type="text" id="filterInput" placeholder=search)
                         div
                             div.switch 
                                 input.look(id="checkbox1" type="checkbox" onclick="showRandom()")
                                 label(for="checkbox1" id="label")
-                        div.Title.count #{count} Einträge
+                        div.Title.count #{count} #{entries}
           
                     if count > 0
                         each game in games
@@ -22,5 +22,3 @@ block content
                                     if game.subscriptionService
                                         div
                                             img(src="../img/"+game.subscriptionService+".png" class="plus") 
-
-                                        

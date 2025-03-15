@@ -6,7 +6,7 @@ block content
                         if game.titleName
                             div.Title.grow #{game.titleName}
                         else 
-                            div.Title.grow kein Spiel gestartet
+                            div.Title.grow #{no_game}
                         div
                             div.switch 
                                 if showTrophies
@@ -30,7 +30,7 @@ block content
                                         div.head
                                             div.Title.grow #{trophy.trophyGroupName}
                                             - var dlc = trophy.trophyGroupId    
-                                    div.Trophy(style=""+settings+" background-image: url('./img/trophies/"+trophy.trophyType+"_"+game.npServiceName+".png');")
+                                    div.Trophy(style=""+settings+" background-image: url('/img/trophies/"+trophy.trophyType+"_"+game.npServiceName+".png');")
                                         div.progress(style="background: linear-gradient(to right, #b8fcc3 "+trophy.progressRate+"%, rgba(255, 255, 255, 0) "+trophy.progressRate+"%);") 
                                         img(src=trophy.trophyIconUrl)
                                         div.grow
