@@ -19,7 +19,7 @@ When you start a Game on PS4, or PS5 the tracker recognize the Game and start tr
 ---
 
 Open:
-- https://localhost:port in your Browser or as a OBS Browsersource for a Trophyoverlay
+- https://localhost:port in your Browser or as a OBS Browsersource for a Trophyoverlay. You can customize the overlay by using obs custom css.
   ![{96132C8F-C1B7-4D36-BD70-FAF9360A8702}](https://github.com/user-attachments/assets/271db410-b7bb-4a5e-81da-caf9056b3694)
 
 - https://localhost:port/trophies in your Browser to keep track of earned trophies. Toggle the Switch to show or hide earned Trophies
